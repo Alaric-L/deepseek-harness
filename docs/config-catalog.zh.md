@@ -1236,6 +1236,12 @@ export interface PiAiCompatProfile {
   /** Whether the endpoint accepts `thinking_token_budget` to cap vLLM reasoning; `openai-completions`. */
   supportsThinkingTokenBudget?: boolean
   /**
+   * Top-level request field used to cap reasoning tokens from thinking budgets;
+   * `openai-completions`. `thinking_token_budget` is vLLM, `thinking_budget` is
+   * Qwen/DashScope/SGLang, `thinking_budget_tokens` is llama.cpp.
+   */
+  thinkingTokenBudgetField?: NonNullable<OpenAICompletionsCompat['thinkingTokenBudgetField']>
+  /**
    * Whether the endpoint accepts `strict` in tool definitions;
    * `openai-completions`, the three Responses protocols, `bedrock-converse-stream`.
    */

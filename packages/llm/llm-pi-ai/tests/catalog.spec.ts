@@ -795,19 +795,19 @@ describe('compat switches', () => {
   })
 
   it('skips models of other protocols on a mixed route instead of failing them', () => {
-    // xai ships both completions and responses models, so a route-level switch
+    // github-copilot ships both completions and responses models, so a route-level switch
     // must land on the former without invalidating the latter.
-    const catalog = getBuiltinModels('xai') as readonly Model<Api>[]
+    const catalog = getBuiltinModels('github-copilot') as readonly Model<Api>[]
     const completions = catalog.find(model => model.api === 'openai-completions')
     const responses = catalog.find(model => model.api === 'openai-responses')
-    if (completions === undefined || responses === undefined) throw new Error('xai no longer ships a mixed catalog')
+    if (completions === undefined || responses === undefined) throw new Error('github-copilot no longer ships a mixed catalog')
 
     const models = modelsOf({
-      xai: {
+      'github-copilot': {
         compat: { supportsReasoningEffort: false },
         models: [{ id: completions.id }, { id: responses.id }],
       },
-    }, 'xai')
+    }, 'github-copilot')
 
     expect((models.get(completions.id)?.compat as OpenAICompletionsCompat).supportsReasoningEffort).toBe(false)
     expect(models.get(responses.id)?.compat).toEqual(responses.compat)
@@ -876,18 +876,18 @@ describe('compat switches', () => {
   })
 
   it('lands each route switch only on the models whose protocol declares it', () => {
-    const catalog = getBuiltinModels('xai') as readonly Model<Api>[]
+    const catalog = getBuiltinModels('github-copilot') as readonly Model<Api>[]
     const completions = catalog.find(model => model.api === 'openai-completions')
     const responses = catalog.find(model => model.api === 'openai-responses')
-    if (completions === undefined || responses === undefined) throw new Error('xai no longer ships a mixed catalog')
+    if (completions === undefined || responses === undefined) throw new Error('github-copilot no longer ships a mixed catalog')
 
     const models = modelsOf({
-      xai: {
+      'github-copilot': {
         // Both protocols take the first switch; only completions takes the second.
         compat: { supportsDeveloperRole: false, thinkingFormat: 'openai' },
         models: [{ id: completions.id }, { id: responses.id }],
       },
-    }, 'xai')
+    }, 'github-copilot')
 
     const onCompletions = models.get(completions.id)?.compat as OpenAICompletionsCompat
     expect(onCompletions.supportsDeveloperRole).toBe(false)
@@ -929,8 +929,9 @@ describe('compat switches', () => {
           compat: {
             supportsFinishReason: false,
             thinkingFormat: 'baseten',
-            chatTemplateArgs: { enable_thinking: { $var: 'thinking.enabled' } },
+            chatTemplateArgs: { enable_thinking: { $var: 'thinking.budget' } },
             supportsThinkingTokenBudget: true,
+            thinkingTokenBudgetField: 'thinking_budget_tokens',
           },
         }],
       },
@@ -939,8 +940,9 @@ describe('compat switches', () => {
     expect(models.get('reasoning-local')?.compat).toEqual({
       supportsFinishReason: false,
       thinkingFormat: 'baseten',
-      chatTemplateArgs: { enable_thinking: { $var: 'thinking.enabled' } },
+      chatTemplateArgs: { enable_thinking: { $var: 'thinking.budget' } },
       supportsThinkingTokenBudget: true,
+      thinkingTokenBudgetField: 'thinking_budget_tokens',
     })
   })
 
@@ -1069,7 +1071,7 @@ describe('compat switches', () => {
   })
 
   it('refuses compat keys pi-ai’s catalog owns, pointing at the catalog route', () => {
-    for (const compat of [{ openRouterRouting: {} }, { supportsAdditionalTools: true }]) {
+    for (const compat of [{ openRouterRouting: {} }, { supportsAdditionalTools: true }, { allowedFallbackModels: [] }]) {
       expect(() => resolveProfiles({
         'acme-gateway': {
           api: 'openai-completions',

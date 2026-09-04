@@ -46,6 +46,19 @@ describe('reasoning schema boundary', () => {
       },
     })).not.toThrow()
   })
+
+  it('accepts the reasoning-token-cap field spellings and the budget template var', () => {
+    expect(configWith({
+      compat: {
+        thinkingTokenBudgetField: 'thinking_budget_tokens',
+        chatTemplateKwargs: { thinking_budget: { $var: 'thinking.budget' } },
+      },
+    })).not.toThrow()
+  })
+
+  it('rejects a reasoning-token-cap field pi-ai does not know', () => {
+    expect(configWith({ compat: { thinkingTokenBudgetField: 'thinking_tokens' } })).toThrow(/expected/)
+  })
 })
 
 describe('modality schema boundary', () => {
